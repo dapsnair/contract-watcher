@@ -50,7 +50,7 @@ const mainMenuItems = [
 const utilityMenuItems = [
   {
     title: "Settings",
-    url: "#",
+    url: "/settings",
     icon: Settings,
   },
   {
@@ -105,7 +105,10 @@ const AppSidebar = () => {
             <SidebarMenu>
               {utilityMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton 
+                    asChild
+                    isActive={isActiveRoute(item.url)}
+                  >
                     <Link to={item.url}>
                       <item.icon className="w-5 h-5" />
                       <span>{item.title}</span>

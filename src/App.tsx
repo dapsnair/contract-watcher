@@ -11,6 +11,7 @@ import ContractsPage from "./pages/ContractsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import CustomerDetailPage from "./pages/CustomerDetailPage";
 import ContractDetailPage from "./pages/ContractDetailPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="contracts" element={<ContractsPage />} />
             <Route path="contracts/:id" element={<ContractDetailPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
