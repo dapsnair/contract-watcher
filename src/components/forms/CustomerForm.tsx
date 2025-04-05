@@ -19,6 +19,7 @@ import { useMutation } from '@tanstack/react-query';
 import { addCustomer } from '@/services/dataService';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { Customer } from '@/types';
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -63,7 +64,18 @@ const CustomerForm = ({ onSuccess }: CustomerFormProps) => {
   });
 
   const mutation = useMutation({
-    mutationFn: addCustomer,
+    mutationFn: (values: CustomerFormValues) => {
+      // Ensure all required fields are passed as non-optional
+      const customerData: Omit<Customer, 'id' | 'createdAt'> = {
+        name: values.name,
+        contactPerson: values.contactPerson,
+        email: values.email,
+        phone: values.phone,
+        address: values.address,
+        status: values.status,
+      };
+      return addCustomer(customerData);
+    },
     onSuccess: () => {
       toast.success('Customer added successfully');
       form.reset();

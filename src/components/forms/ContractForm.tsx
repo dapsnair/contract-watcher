@@ -25,6 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Contract } from '@/types';
 
 const formSchema = z.object({
   customerId: z.string().min(1, {
@@ -91,12 +92,24 @@ const ContractForm = ({ onSuccess, customerId }: ContractFormProps) => {
   });
 
   const mutation = useMutation({
-    mutationFn: (values: Omit<ContractFormValues, 'customerName'>) => {
+    mutationFn: (values: ContractFormValues) => {
       const customer = customers?.find(c => c.id === values.customerId);
-      return addContract({
-        ...values,
+      
+      // Ensure all required fields are passed as non-optional
+      const contractData: Omit<Contract, 'id'> = {
+        customerId: values.customerId,
         customerName: customer?.name || '',
-      });
+        type: values.type,
+        name: values.name,
+        startDate: values.startDate.toISOString(),
+        endDate: values.endDate.toISOString(),
+        renewalDate: values.renewalDate.toISOString(),
+        amount: values.amount,
+        status: values.status,
+        notes: values.notes,
+      };
+      
+      return addContract(contractData);
     },
     onSuccess: () => {
       toast.success('Contract added successfully');
