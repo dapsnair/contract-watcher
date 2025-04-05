@@ -1,4 +1,3 @@
-
 import { Customer, Contract, Notification, DashboardStats } from '../types';
 import { format, addDays, subDays, parseISO, isAfter, isBefore } from 'date-fns';
 
@@ -227,6 +226,11 @@ export const fetchCustomerById = async (id: string): Promise<Customer | undefine
 export const fetchContracts = async (): Promise<Contract[]> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   return contracts;
+};
+
+export const fetchContractById = async (id: string): Promise<Contract | undefined> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return contracts.find(contract => contract.id === id);
 };
 
 export const fetchContractsByCustomerId = async (customerId: string): Promise<Contract[]> => {
