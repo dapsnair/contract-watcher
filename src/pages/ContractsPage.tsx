@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Search, 
   Plus, 
@@ -46,6 +46,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import ContractForm from '@/components/forms/ContractForm';
+import ContractEditForm from '@/components/forms/ContractEditForm';
+import ContractRenewForm from '@/components/forms/ContractRenewForm';
 
 const getContractIcon = (type: string) => {
   switch (type) {
@@ -81,6 +83,10 @@ const getStatusBadge = (status: string, endDate: string) => {
 const ContractsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddContractOpen, setIsAddContractOpen] = useState(false);
+  const [isEditContractOpen, setIsEditContractOpen] = useState(false);
+  const [isRenewContractOpen, setIsRenewContractOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const navigate = useNavigate();
   
   const { data: contracts, isLoading, error, refetch } = useQuery({
     queryKey: ['contracts'],
@@ -104,6 +110,20 @@ const ContractsPage = () => {
 
   const handleAddContract = () => {
     setIsAddContractOpen(true);
+  };
+
+  const handleViewDetails = (contractId: string) => {
+    navigate(`/contracts/${contractId}`);
+  };
+
+  const handleEditContract = (contract: Contract) => {
+    setSelectedContract(contract);
+    setIsEditContractOpen(true);
+  };
+
+  const handleRenewContract = (contract: Contract) => {
+    setSelectedContract(contract);
+    setIsRenewContractOpen(true);
   };
 
   if (error) {
@@ -285,9 +305,15 @@ const ContractsPage = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
-                          <DropdownMenuItem>Edit Contract</DropdownMenuItem>
-                          <DropdownMenuItem>Renew Contract</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleViewDetails(contract.id)}>
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditContract(contract)}>
+                            Edit Contract
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleRenewContract(contract)}>
+                            Renew Contract
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -312,6 +338,42 @@ const ContractsPage = () => {
           />
         </DialogContent>
       </Dialog>
+
+      {selectedContract && (
+        <>
+          <Dialog open={isEditContractOpen} onOpenChange={setIsEditContractOpen}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Edit Contract</DialogTitle>
+              </DialogHeader>
+              <ContractEditForm 
+                contract={selectedContract}
+                onSuccess={() => {
+                  setIsEditContractOpen(false);
+                  refetch();
+                  setSelectedContract(null);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isRenewContractOpen} onOpenChange={setIsRenewContractOpen}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Renew Contract</DialogTitle>
+              </DialogHeader>
+              <ContractRenewForm 
+                contract={selectedContract}
+                onSuccess={() => {
+                  setIsRenewContractOpen(false);
+                  refetch();
+                  setSelectedContract(null);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 };
