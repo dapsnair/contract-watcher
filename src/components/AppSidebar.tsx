@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
-  FileContract,
+  FileText,
   Bell,
   User,
   Settings,
@@ -38,7 +38,7 @@ const mainMenuItems = [
   {
     title: "Contracts",
     url: "/contracts",
-    icon: FileContract,
+    icon: FileText,
   },
   {
     title: "Notifications",
@@ -86,7 +86,7 @@ const AppSidebar = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    active={isActiveRoute(item.url)}
+                    isActive={isActiveRoute(item.url)}
                   >
                     <Link to={item.url}>
                       <item.icon className="w-5 h-5" />
