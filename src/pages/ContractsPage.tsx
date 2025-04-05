@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
@@ -16,6 +15,7 @@ import {
   HeadphonesIcon,
   FileIcon,
   Loader2,
+  Filter,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { fetchContracts } from '@/services/dataService';
 import { Contract } from '@/types';
 import { format, parseISO, differenceInDays } from 'date-fns';
@@ -44,6 +45,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import ContractForm from '@/components/forms/ContractForm';
 import ContractEditForm from '@/components/forms/ContractEditForm';
@@ -82,6 +84,7 @@ const getStatusBadge = (status: string, endDate: string) => {
 
 const ContractsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddContractOpen, setIsAddContractOpen] = useState(false);
   const [isEditContractOpen, setIsEditContractOpen] = useState(false);
   const [isRenewContractOpen, setIsRenewContractOpen] = useState(false);
@@ -93,11 +96,16 @@ const ContractsPage = () => {
     queryFn: fetchContracts,
   });
 
-  const filteredContracts = contracts?.filter(contract => 
-    contract.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contract.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contract.type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredContracts = contracts?.filter(contract => {
+    const matchesSearch = 
+      contract.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.type.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
 
   const activeContracts = contracts?.filter(c => c.status === 'active').length || 0;
   const expiringContracts = contracts?.filter(c => {
@@ -200,15 +208,34 @@ const ContractsPage = () => {
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm">
-        <div className="p-4 border-b">
-          <div className="relative">
+        <div className="p-4 border-b flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-grow">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search contracts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 bg-background w-full md:w-80"
+              className="pl-8 bg-background w-full"
             />
+          </div>
+          <div className="flex-shrink-0 w-full sm:w-48">
+            <Select 
+              value={statusFilter} 
+              onValueChange={(value) => setStatusFilter(value)}
+            >
+              <SelectTrigger className="w-full">
+                <div className="flex items-center">
+                  <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <SelectValue placeholder="Filter by status" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="expired">Expired</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         
@@ -329,6 +356,9 @@ const ContractsPage = () => {
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Add New Contract</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new contract.
+            </DialogDescription>
           </DialogHeader>
           <ContractForm 
             onSuccess={() => {
@@ -345,6 +375,9 @@ const ContractsPage = () => {
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>Edit Contract</DialogTitle>
+                <DialogDescription>
+                  Make changes to the contract details.
+                </DialogDescription>
               </DialogHeader>
               <ContractEditForm 
                 contract={selectedContract}
@@ -361,6 +394,9 @@ const ContractsPage = () => {
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>Renew Contract</DialogTitle>
+                <DialogDescription>
+                  Update the contract with new dates and terms.
+                </DialogDescription>
               </DialogHeader>
               <ContractRenewForm 
                 contract={selectedContract}
